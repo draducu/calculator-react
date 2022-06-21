@@ -18,6 +18,13 @@ function reducer(state, { type, payload }) {
         return state;
       }
 
+      if (state.currentOperand == null) {
+        return {
+          ...state,
+          operation: payload.operation,
+        };
+      }
+
       if (state.previousOperand == null) {
         return {
           ...state,
@@ -34,6 +41,15 @@ function reducer(state, { type, payload }) {
       };
     case ACTIONS.CLEAR:
       return {};
+    case ACTIONS.EVALUATE:
+      if (
+        state.operation == null ||
+        state.currentOperand == null ||
+        state.previousOperand == null
+      ) {
+        return state; // do nothing at all , daca nu am fiecare factor necesar: ex 15 - lipsa si s a apasat egal
+      }
+      break;
     case ACTIONS.ADD_DIGIT:
       if (payload.digit === "0" && state.currentOperand === "0") return state;
 
@@ -69,6 +85,7 @@ function evaluate({ currentOperand, previousOperand, operation }) {
     case "/":
       computation = prev / curr;
       break;
+    default:
   }
   return computation;
 }
@@ -111,7 +128,14 @@ function App() {
       <OperationButton operation="-" dispatch={dispatch} />
       <DigitButton digit="." dispatch={dispatch} />
       <DigitButton digit="0" dispatch={dispatch} />
-      <button className="span-two">=</button>
+      <button
+        className="span-two"
+        onClick={() => {
+          dispatch({ type: ACTIONS.EVALUATE });
+        }}
+      >
+        =
+      </button>
     </div>
   );
 }
